@@ -1,7 +1,10 @@
 program AAcircuit1;
 
+{$MODE Delphi}
+
 uses
-  Forms,
+  Forms,              
+  Interfaces,
   main in 'main.pas' {mainForm},
   component in 'component.pas' {Seditform},
   scanmemo in 'scanmemo.pas' {sresult},
@@ -12,7 +15,7 @@ uses
   magline in 'magline.pas' {maglineF},
   ImportASC in 'ImportASC.pas';
 
-{$R *.RES}
+{.$R *.RES}
 
 begin
   Application.Initialize;

@@ -1,9 +1,11 @@
 unit component;
 
+{$MODE Delphi}
+
 interface
 
 uses
-  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  LCLIntf, LCLType, LMessages, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, Buttons;
 
 type
@@ -70,11 +72,11 @@ implementation
 
 uses main;
 
-{$R *.DFM}
+{$R *.lfm}
 
 procedure ClearCursor;
 Begin
-  //alte Cursor-Box grau überschreiben
+  //alte Cursor-Box grau Ã¼berschreiben
   SEditForm.pb.canvas.brush.Style:=bsclear;
   SEditForm.pb.canvas.pen.color:=clgray;
   SEditForm.pb.Canvas.Rectangle(cursorx*extentx,cursory*extenty,(cursorx+1)*extentx+1,(cursory+1)*extenty+1);
@@ -91,7 +93,7 @@ Procedure ShowSymbol(const compindex:integer;var Target:TPaintBox);
 var
  ori,x,y,temp:byte;
 Begin
-  //PaintBox löschen und Symbol in allen Ausrichtungen zeichen
+  //PaintBox lÃ¶schen und Symbol in allen Ausrichtungen zeichen
   SEditForm.PB.Canvas.Font.Color:=ClBlack;
   Target.Canvas.FillRect(Rect(0,0,MatrixX*extentx,MatrixY*extenty)) ;
   for ori:=1 to 4 do
@@ -328,7 +330,7 @@ begin
 end;
 function CheckEraser(const puffer:string):boolean;
 Begin
- Result:=( (pos('Eraser',puffer)>0) OR (pos('Viskelæder',puffer)>0) OR (pos('Radierer',puffer)>0))
+ Result:=( (pos('Eraser',puffer)>0) OR (pos('ViskelÃ¦der',puffer)>0) OR (pos('Radierer',puffer)>0))
 End;
 procedure FillEraser(const index:integer);
 var
@@ -351,7 +353,7 @@ var
  BIB: TextFile;
  filename:shortstring;
  puffer:string;
- x,y:integer; // Zähler für Raster
+ x,y:integer; // ZÃ¤hler fÃ¼r Raster
  compindex,ori:byte; //orientation
  char:byte;
  name:shortstring;
@@ -367,7 +369,7 @@ begin
     PickPointsExist:=((compindex-1)<(PickPointList.Count));
     If PickPointsExist then PickPoints:=PickPointList.Items[compindex-1];
     name:='<'+listbox1.Items[compindex-1]+'>';
-    //if ((name='<Radierer/Eraser>') OR (name='<Viskelæder>'))
+    //if ((name='<Radierer/Eraser>') OR (name='<ViskelÃ¦der>'))
 
     If CheckEraser(name) Then FillEraser(compindex);
 

@@ -1,16 +1,22 @@
 unit main;
 
+{$MODE Delphi}
+
 interface
 
 
 uses
-  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ExtCtrls,INIFiles, Buttons,math, Menus, ComCtrls,Printers,WinSpool,ShellApi;
+  LCLIntf, LCLType, LMessages, Messages, SysUtils, Classes, Graphics, Controls,
+  Forms, Dialogs, StdCtrls, ExtCtrls, INIFiles, Buttons, math, Menus, ComCtrls;
 
 function LoadASC(const filename:string):boolean;
 
 type
+
+  { TmainForm }
+
   TmainForm = class(TForm)
+    MenuItem1: TMenuItem;
     SaveDialog1: TSaveDialog;
     MainMenu1: TMainMenu;
     DF1: TMenuItem;
@@ -39,9 +45,7 @@ type
     Symbol1: TMenuItem;
     N90rechtsdrehen1: TMenuItem;
     Symbolvertikalspiegelns1: TMenuItem;
-    PrintDialog1: TPrintDialog;
     N7: TMenuItem;
-    Drucken1: TMenuItem;
     Blink: TTimer;
     Zwischenablage1: TMenuItem;
     ganzeZeichnungindieZwischenablagekopieren1: TMenuItem;
@@ -50,10 +54,7 @@ type
     ZwischenablageaufdieZeichenflchekopieren1: TMenuItem;
     N4: TMenuItem;
     CommandsExpertsonly1: TMenuItem;
-    Druckereinstellungen1: TMenuItem;
-    FontDialog1: TFontDialog;
     openASC: TOpenDialog;
-    N10: TMenuItem;
     IMPORTascLTSpice1: TMenuItem;
     AutoLineconfigurieren1: TMenuItem;
     Help1: TMenuItem;
@@ -153,14 +154,12 @@ type
     procedure FormKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
-    procedure Drucken1Click(Sender: TObject);
     procedure BlinkTimer(Sender: TObject);
     procedure editModeBClick(Sender: TObject);
     procedure TextmodeBClick(Sender: TObject);
     procedure pasteclipBClick(Sender: TObject);
     procedure CommandsExpertsonly1Click(Sender: TObject);
     procedure loadpasteBClick(Sender: TObject);
-    procedure Druckereinstellungen1Click(Sender: TObject);
     procedure selectBClick(Sender: TObject);
     procedure IMPORTascLTSpice1Click(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -210,7 +209,11 @@ type
   s_char:byte;
  end;
  TPPoint = record
-  X: shortint;  Y: shortint;  XM:shortint;  YM:shortint; end;
+  X: shortint;
+  Y: shortint;
+  XM:shortint;
+  YM:shortint;
+ end;
  PPickpoint=^TPickpoint;
  TPickPoint=array[0..3] of TPPoint;
 var
@@ -220,7 +223,7 @@ var
   PickPoints:PPickpoint;
   mainForm: TmainForm;
   Text_Editor:TText_edit;
-  matrix:array[0..199,0..69]of byte; //damit bei ILine nicht Bereichsüberschreitung
+  matrix:array[0..199,0..69]of byte; //damit bei ILine nicht BereichsÃ¼berschreitung
   comp:array[1..60,1..4,0..8,0..5] of byte;
   tempcomp:array[0..8,0..5] of byte;
   tempchar:byte;
@@ -236,18 +239,18 @@ var
   selectbox:Tselectbox;
   MatrixX,MatrixY:Byte;
 const
- IDataMAXItems=20; //maximal 20 Einträge siehe auch array oben
+ IDataMAXItems=20; //maximal 20 EintrÃ¤ge siehe auch array oben
  AdvCursor1=1; AdvCursor2=2; AdvCursor3=3;
  compx=9;
  compy=6;
  version='v1.28.7 beta 10/23/16';
 implementation
 
-uses component, scanmemo, line, command, ClipBFormUnit, selection, splash,
-  magline,importASC;
+uses component, scanmemo, line, command, clipBformunit, selection, splash,
+  magline,ImportASC;
 
-{$R *.DFM}
-{$R cursors.RES}
+{$R *.lfm}
+{$R cursors.res}
 
 procedure gridrasterRECT(x1,y1,x2,y2:integer);
 var
@@ -269,7 +272,7 @@ Begin
        MainForm.paintbox1.Canvas.MoveTo(x1*extentx,y*extenty);
        MainForm.paintbox1.Canvas.LineTo(x2*extentx,y*extenty);
       End;
-        //schwarze Ränder nachzeichnen
+        //schwarze RÃ¤nder nachzeichnen
    MainForm.Paintbox1.Canvas.pen.Color:=clblack;
    If x1=0 Then
     Begin
@@ -328,7 +331,7 @@ Begin
   mRectRefresh(0,0,matrixx-1,matrixy-1) ;
 End;
 procedure mboxrefresh;
-//box wie sie bei rect oder select entsteht überschreiben
+//box wie sie bei rect oder select entsteht Ã¼berschreiben
 Begin
     mrectrefresh(rectx,recty,mausxsave,recty);
     mrectrefresh(rectx,mausysave,mausxsave,mausysave);
@@ -341,7 +344,7 @@ Begin
   Begin  //es wurde ein Text eingegeben
    if length(Text_Editor.text)=1 Then  //einzelner Buchstabe
     commandF.memo2.Lines.Add('char:'+inttostr(ord(Text_Editor.text[1]))+','+inttostr(Text_Editor.Left)+','+inttostr(Text_Editor.Y));
-   if length(Text_Editor.text)>1 Then  //zusammenhängender Text
+   if length(Text_Editor.text)>1 Then  //zusammenhÃ¤ngender Text
     commandF.memo2.Lines.Add('text:'+Text_Editor.text+','+inttostr(Text_Editor.left)+','+inttostr(Text_Editor.y));
    Text_Editor.text:='';
    Text_Editor.coherent:=False;
@@ -462,7 +465,7 @@ Begin
      lastscan:=scan;
      while (memoline[scan]<>',') And (scan<=length(memoline)) do inc(scan);
      gespiegeltchar:=memoline[lastscan];
-  except on EConvertError do showmessage(memoline+' ist kein gültiges Zeichen-Kommando...');
+  except on EConvertError do showmessage(memoline+' ist kein gÃ¼ltiges Zeichen-Kommando...');
   End;
 End;
 
@@ -722,7 +725,7 @@ Begin
               case m_deg of
                -64..-21: c:='`';
                -20..20:  c:='''';
-                21..64:  c:='´';
+                21..64:  c:=''''; // acute accent not an ascii char
                end;
 
              If c='.' then
@@ -817,8 +820,8 @@ Begin
     If toArray Then matrix[left,temp]:=ord(p_char);
    End;
  //Eckzeichen
- If ((dir=0) And (abs(dy)>0)) or ((dir=1) And (abs(dx)>0)) Then  //gibt es überhaupt eine ecke?
-// If (abs(dx)>0) Then  //gibt es überhaupt eine ecke?
+ If ((dir=0) And (abs(dy)>0)) or ((dir=1) And (abs(dx)>0)) Then  //gibt es Ã¼berhaupt eine ecke?
+// If (abs(dx)>0) Then  //gibt es Ã¼berhaupt eine ecke?
   Begin
    MainForm.paintbox1.Canvas.TextOut(left*extentx,top*extenty,chr(corner_char));
    If toArray Then matrix[left,top]:=corner_char;
@@ -868,7 +871,7 @@ End;
 
 procedure ILinepaint(const x1,y1,x2,y2:byte;const toArray:boolean);
 var
- // alte MagLine, wegen abwärtscompatibilität noch vorhanden
+ // alte MagLine, wegen abwÃ¤rtscompatibilitÃ¤t noch vorhanden
  mx,my,temp,xdiv,ydiv,eckx,ecky,SEcount:byte;
  startC,endC,eckC:char;
  startr:1..2; //Startrichtung 1=oben/unten  2=rechts/links
@@ -879,7 +882,7 @@ Begin
   SECount:=0;
   IF x2>=x1 Then xdiv:=x2-x1 Else xdiv:=x1-x2;  //Diffenernz x
   IF y2>=y1 Then ydiv:=y2-y1 Else ydiv:=y1-y2;  //Diffenernz y
-  // nichts drumherum     // geprüft
+  // nichts drumherum     // geprÃ¼ft
   If (matrix[x1-1,y1]=0) AND (matrix[x1+1,y1]=0) AND (matrix[x1,y1-1]=0) AND (matrix[x1,y1+1]=0) Then
    Begin
     IF xdiv>ydiv then startr:=2 Else startr:=1;
@@ -1248,7 +1251,7 @@ Begin
         commandF.memo2.Lines.Delete(mlindex);
        If (selectbox.mode=1) or (selectbox.mode=2) Then //move oder copy
         Begin
-         //If selectbox.mode=1 Then //move  bestehende symbole löschen
+         //If selectbox.mode=1 Then //move  bestehende symbole lÃ¶schen
          // commandF.memo2.Lines.Delete(mlindex);
          If compfound then
           mline:=('comp:'+inttostr(memocomp)+','+inttostr(memoori)+','+
@@ -1341,7 +1344,7 @@ Begin
       sresult.LB.Items.add('Line:'+inttostr(mlindex)+': '+chr(memocomp));
      IF textfound Then
       sresult.LB.Items.add('text:'+inttostr(mlindex)+': '+text);
-     If found=True then morefound:=True;    //mehrere überlagerte gefunden
+     If found=True then morefound:=True;    //mehrere Ã¼berlagerte gefunden
      found:=True;
      //showmessage(inttostr(memocomp)+' gefunden');
 
@@ -1379,7 +1382,7 @@ Begin
          MainForm.ListBox1Click(sender);
          if gespiegeltchar='s' then gespiegelt:=true;
         End;
-       If linefound Then      // wieder die ursprüngliche Linie wählen
+       If linefound Then      // wieder die ursprÃ¼ngliche Linie wÃ¤hlen
         Begin
          case memocomp of
           0:mainform.lb1.Click;
@@ -1411,7 +1414,7 @@ begin
     If mausy>matrixY Then mausY:=matrixy;
     If editmode then
      Begin
-      //alte EditCursor Position überschreiben
+      //alte EditCursor Position Ã¼berschreiben
       PlaceEditorText;
       mRectRefresh(Text_Editor.x,Text_Editor.y,Text_Editor.x,Text_Editor.y);
       Text_Editor.x:=mausx;
@@ -1605,7 +1608,7 @@ begin
   End;
 end;
 function getPickPoints(const puffer:string;var index:byte;var X,Y,XM,YM:ShortInt):boolean;
-//für den IMPORT von LTSpice
+//fÃ¼r den IMPORT von LTSpice
 Begin
  index:=0;
  while ((puffer[index]<>'>') AND (index<30)) do inc(index);
@@ -1621,7 +1624,7 @@ Begin
 End;
 function CheckEraser(const puffer:string):boolean;
 Begin
- Result:=( (pos('Eraser',puffer)>0) OR (pos('Viskelæder',puffer)>0) OR (pos('Radierer',puffer)>0))
+ Result:=( (pos('Eraser',puffer)>0) OR (pos('ViskelÃ¦der',puffer)>0) OR (pos('Radierer',puffer)>0))
 End;
 
 procedure LoadIData;
@@ -1656,7 +1659,7 @@ Begin
      IData[index].s_char:=ord(puffer[11]);
      inc(index);
     End; 
-  Until EOF(datafile) or (index=IDataMAXItems);    //maximal Einträge
+  Until EOF(datafile) or (index=IDataMAXItems);    //maximal EintrÃ¤ge
   IDataItemIndex:=index;
   closefile(datafile);
  End;
@@ -1667,7 +1670,7 @@ var
  BIB: TextFile;
  filename:shortstring;
  puffer:string;
- x,y:integer; // Zähler für Raster
+ x,y:integer; // ZÃ¤hler fÃ¼r Raster
  listindex:integer;
  compindex,ori,laenge:byte; //orientation
  CompNameEndIndex,temp:Byte;
@@ -1688,7 +1691,7 @@ begin
   +ExtractFilePath(Paramstr(0))+chr(13)
   +'Symboldatei nicht gefunden...'+chr(13)
   +'Symbolfile component'+inttostr(sprache)+'.ini not found...'+chr(13)
-  +'Deutsch als Standard Sprache für Symboldatei geladen...'+chr(13)
+  +'Deutsch als Standard Sprache fÃ¼r Symboldatei geladen...'+chr(13)
   +'Language German loaded as default');
    sprache:=1; //deutsch als standard sprache einsetzen;
    filename:=ExtractFilePath(Paramstr(0))+'component'+inttostr(sprache)+'.ini';
@@ -1711,7 +1714,7 @@ begin
    firstPickPoint:=getPickPoints(puffer,CompNameEndIndex,PickPoints^[0].X,PickPoints^[0].Y,PickPoints^[0].XM,PickPoints^[0].YM);
    //if not FirstPickPoint Then dispose(PickPoints);
    listbox1.Items.Add(copy(puffer,2,CompNameEndIndex-2));  //klammern <...> wegschneiden
-   //showmessage(copy(puffer,charindex+1,2)+'    länge'+inttostr(length(puffer))+'    charindex'+inttostr(charindex));
+   //showmessage(copy(puffer,charindex+1,2)+'    lÃ¤nge'+inttostr(length(puffer))+'    charindex'+inttostr(charindex));
 
    If CheckEraser(puffer) Then
     eraser:=compindex+1;
@@ -1840,14 +1843,14 @@ begin
       End;
      If rectmode AND (not ersterRpunkt) Then
       Begin
-       // rect überschreiben, jede Seite einzeln
+       // rect Ã¼berschreiben, jede Seite einzeln
        mboxrefresh;
        lrectangle(rectx,recty,mausx,mausy,False);
        //gridraster;
       End;
      If (selectmode AND not ersterRpunkt AND not selectbox.rect_coord) Then
       Begin
-       // rect überschreiben, jede Seite einzeln
+       // rect Ã¼berschreiben, jede Seite einzeln
        mboxrefresh;
        MainForm.paintbox1.Canvas.font.Color:=clgreen;
        lrectangle(rectx,recty,mausx,mausy,False);
@@ -1995,7 +1998,7 @@ begin
        lineempty:=False;
        leercount:=0;
       End;
-   //paintbox1.Canvas.TextOut(x*extentx,y+extenty,chr(temp));   weiß nicht mehr weshalb...
+   //paintbox1.Canvas.TextOut(x*extentx,y+extenty,chr(temp));   weiÃŸ nicht mehr weshalb...
    stringpuffer:=stringpuffer+chr(temp);
   End;
   stringpuffer:=copy(stringpuffer,1,matrixX-leercount);
@@ -2003,7 +2006,7 @@ begin
    Else linecountcut:=0;
   ClipBForm.ClipBMemo.Lines.Add(stringpuffer);
  end;
- // überflüssige Zeilen am Ende abschneiden
+ // Ã¼berflÃ¼ssige Zeilen am Ende abschneiden
  for x:=ClipBForm.ClipBMemo.Lines.Count downto ClipBForm.ClipBMemo.Lines.Count-linecountcut do
   ClipBForm.ClipBMemo.Lines.Delete(x);
  ClipBForm.ClipBMemo.Lines.Add('(created by AACircuit '+version+' www.tech-chat.de)');
@@ -2016,7 +2019,7 @@ procedure TmainForm.FormCreate(Sender: TObject);
 var
  BIB: TextFile;
  filename:shortstring;
- puffer:string;
+ puffer:String;
  hauptm:shortint;
  unterm:shortint;
  sprachstring:shortstring;
@@ -2025,12 +2028,12 @@ var
 
 begin
  MatrixX:=72; //felder breite
- MatrixY:=36; //felder höhe
+ MatrixY:=36; //felder hÃ¶he
  Screen.Cursors[AdvCursor1] := LoadCursor(HInstance, 'ADVCROSS1');
  Screen.Cursors[AdvCursor2] := LoadCursor(HInstance, 'ADVCROSS2');
  Screen.Cursors[AdvCursor3] := LoadCursor(HInstance, 'ADVCROSS3');
  mainForm.Caption:='AACircuit '+version+'                                                                                             by Andreas Weber';
- PickPointList:=TList.Create; //für Import ASC
+ PickPointList:=TList.Create; //fÃ¼r Import ASC
  firstimport:=True;
  edited:=false;
  showori:=1;
@@ -2046,12 +2049,13 @@ begin
    Showmessage('Fehlende Datei im Verzeichnis : '+chr(13)
    +'Missing file path:'+chr(13)
    +ExtractFilePath(Paramstr(0))+chr(13)
-   +'Menüdatei menu.ini nicht gefunden...'+chr(13)
+   +'MenÃ¼datei menu.ini nicht gefunden...'+chr(13)
    +'File menu.ini not found...'+chr(13)
    +'Programm wird geschlossen. Program terminates.');
    halt;
   End
  Else Begin
+
   Assignfile(bib,filename);
   reset(bib);
   readln(bib,puffer);
@@ -2090,7 +2094,7 @@ begin
     End;
    End;
   readln(bib,puffer);
-  mainmenu1.items[4].caption:=puffer; //Hauptmenü SPRACHE
+  mainmenu1.items[4].caption:=puffer; //HauptmenÃ¼ SPRACHE
   readln(bib,puffer);
   If puffer='<SpeedButton.hints>' Then
   Begin
@@ -2165,7 +2169,7 @@ var
  temp,leercount:byte;
 begin
  IF (savedialog1.Execute) AND (NOT (fileExists(savedialog1.FileName)) OR
-     (Application.MessageBox(Pchar('Vorhandene Datei überschreiben?'+chr(13)+'Overwrite existing file?'),'File already exists!',4+16+mb_DefButton2)=IDYes)) Then
+     (Application.MessageBox(Pchar('Vorhandene Datei Ã¼berschreiben?'+chr(13)+'Overwrite existing file?'),'File already exists!',4+16+mb_DefButton2)=IDYes)) Then
   Begin
    Assignfile(saveFile,savedialog1.FileName);
    rewrite(saveFile);
@@ -2192,7 +2196,7 @@ end;
 
 procedure TmainForm.Neu1Click(Sender: TObject);
 begin
- IF (Application.MessageBox(Pchar('Wirklich ALLES löschen?'+chr(13)+'Delete ALL?'),'Vorsicht!',4+16+mb_DefButton2)=IDYes)
+ IF (Application.MessageBox(Pchar('Wirklich ALLES lÃ¶schen?'+chr(13)+'Delete ALL?'),'Vorsicht!',4+16+mb_DefButton2)=IDYes)
  Then
   Begin
    fillchar(matrix,sizeof(matrix),#0);
@@ -2425,7 +2429,7 @@ var
  sline:Byte;      //Memo Zeile
 begin
  IF (SaveAAC.Execute) AND (NOT (fileExists(SaveAAC.FileName)) OR
-     (Application.MessageBox(Pchar('Vorhandene Datei überschreiben?'+chr(13)+'Overwrite existing file?'),'File already exists!',4+16+mb_DefButton2)=IDYes)) Then
+     (Application.MessageBox(Pchar('Vorhandene Datei Ã¼berschreiben?'+chr(13)+'Overwrite existing file?'),'File already exists!',4+16+mb_DefButton2)=IDYes)) Then
   Begin
    OpenAAC.InitialDir:=ExtractFilePath(SaveAAC.FileName);
    Assignfile(saveFile,SaveAAC.FileName);
@@ -2513,7 +2517,7 @@ begin
    Showmessage('Fehlende Datei im Verzeichnis : '+chr(13)
    +'Missing file path:'+chr(13)
    +ExtractFilePath(Paramstr(0))+chr(13)
-   +'Menüdatei menu.ini nicht gefunden...'+chr(13)
+   +'MenÃ¼datei menu.ini nicht gefunden...'+chr(13)
    +'File menu.ini not found...'+chr(13)
    +'Programm wird geschlossen. Program terminates.');
    halt;
@@ -2536,7 +2540,7 @@ begin
   closefile(quelle);
   closefile(ziel);
  End;
-  showmessage('Programm neu starten um Änderungen zu aktivieren!'+chr(13)+'Please restart program to apply changes');
+  showmessage('Programm neu starten um Ã„nderungen zu aktivieren!'+chr(13)+'Please restart program to apply changes');
 end;
 
 procedure TmainForm.FormKeyDown(Sender: TObject; var Key: Word;
@@ -2554,7 +2558,7 @@ begin
      If key=8 Then
       Text_Editor.text:=Copy(Text_Editor.text,0,Length(Text_Editor.text)-1)
      Else PlaceEditorText;
-     //Alte Cursorposition löschen
+     //Alte Cursorposition lÃ¶schen
      mrectrefresh(Text_Editor.X,Text_Editor.Y,Text_Editor.X,Text_Editor.Y);
      blink.Enabled:=False;
     End;
@@ -2581,42 +2585,6 @@ begin
   canclose:=(Application.MessageBox(Pchar('Wirklich beenden?'+chr(13)+'Close program?'),'AAcircuit '+version,4+32+mb_DefButton2)=IDYes);
 end;
 
-procedure TmainForm.Drucken1Click(Sender: TObject);
-var
- x,y,leercount,temp:byte;
- zeile:shortstring;
- //hdpi,vdpi:Integer;
-const
- oRand=100;
- lRand=200;
-begin
- If PrintDialog1.Execute Then
-  Begin
-  Printer.Orientation:=poPortrait;
-  Printer.Title:='AACircuit '+version;
-  Printer.BeginDoc;
-  //Printer.Canvas.font.Name:='Courier New';
-  //Printer.Canvas.Font.Size:=10;
-  Printer.Canvas.Font:=FontDialog1.Font;
-  zeile:=FormatDateTime('dddd, mmmm d, yyyy, hh:mm AM/PM ',now)+SaveAAC.FileName;
-  Printer.Canvas.TextOut(lRand,50,zeile);
-    For y:=0 to matrixY-1 do
-     Begin
-      zeile:='';
-      leercount:=0;
-      for x:=0 to matrixX-1 do
-       Begin
-        temp:=matrix[x,y];
-        if temp=0 Then temp:=32;
-        if temp=32 Then INC(leercount) Else leercount:=0;
-        zeile:=zeile+chr(temp);
-       End;
-      zeile:=copy(zeile,1,matrixX-leercount);
-      Printer.Canvas.TextOut(lRand,y*(Abs(Printer.Canvas.font.Height)+10)+oRand,zeile);
-     End;
-  Printer.EndDoc;
-  End;
-end;
 procedure TmainForm.BlinkTimer(Sender: TObject);
 begin
  If editmode then
@@ -2667,11 +2635,6 @@ begin
    ResetALLModes;
    pastemode:=True;
   End;
-end;
-
-procedure TmainForm.Druckereinstellungen1Click(Sender: TObject);
-begin
- fontdialog1.Execute;
 end;
 
 procedure TmainForm.selectBClick(Sender: TObject);
@@ -2744,7 +2707,7 @@ Begin
         If (x=x2) or (y=y2) Then  //waagerechte oder senkrechte Linie
            commandF.memo2.Lines.Add('line:0,'+inttostr(x)+','+inttostr(y)+','+inttostr(x2)+','+inttostr(y2))
           //commandF.memo2.Lines.Add('MagL:1,'+inttostr(x)+','+inttostr(y)+','+inttostr(x2)+','+inttostr(y2))
-        Else //schräge Linie
+        Else //schrÃ¤ge Linie
          commandF.memo2.Lines.Add('DirL:0,'+inttostr(x)+','+inttostr(y)+','+inttostr(x2)+','+inttostr(y2));
       End;
     Until EOF(ascfile);
@@ -2871,7 +2834,7 @@ begin
 end;
 
 procedure TmainForm.Help1Click(Sender: TObject);
-begin Application.HelpCommand(HELP_INDEX,0) end;
+begin Application.HelpCommand(0,0) end;
 
 procedure TmainForm.licenceandcredits1Click(Sender: TObject);
 begin
@@ -2880,9 +2843,7 @@ end;
 
 procedure TmainForm.visitHomepage1Click(Sender: TObject);
 begin
-ShellExecute(Application.Handle, 'open',
-             PCHar('http://www.tech-chat.de'), nil, nil,
-             SW_ShowNormal);
+OpenURL(PCHar('http://www.tech-chat.de')); { *Konvertiert von ShellExecute* }
 
 end;
 
@@ -2902,7 +2863,7 @@ procedure TmainForm.size1Click(Sender: TObject);
 begin
  size1.Checked:=True;
  MatrixX:=72; //felder breite
- MatrixY:=36; //felder höhe
+ MatrixY:=36; //felder hÃ¶he
  SetPaintBox;
 end;
 
@@ -2910,7 +2871,7 @@ procedure TmainForm.size2Click(Sender: TObject);
 begin
  size2.Checked:=True;
  MatrixX:=72; //felder breite
- MatrixY:=49; //felder höhe
+ MatrixY:=49; //felder hÃ¶he
  SetPaintBox;
 end;
 
@@ -2918,7 +2879,7 @@ procedure TmainForm.size4Click(Sender: TObject);
 begin
  size3.Checked:=True;
  MatrixX:=200; //felder breite
- MatrixY:=70; //felder höhe
+ MatrixY:=70; //felder hÃ¶he
  SetPaintBox;
 end;
 
@@ -2926,7 +2887,7 @@ procedure TmainForm.size3Click(Sender: TObject);
 begin
  size3.Checked:=True;
  MatrixX:=100; //felder breite
- MatrixY:=49; //felder höhe
+ MatrixY:=49; //felder hÃ¶he
  SetPaintBox;
 end;
 

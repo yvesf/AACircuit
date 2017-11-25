@@ -1,9 +1,11 @@
 unit line;
 
+{$MODE Delphi}
+
 interface
 
 uses
-  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  LCLIntf, LCLType, LMessages, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ExtCtrls, StdCtrls;
 
 type
@@ -18,7 +20,7 @@ var
   MLform: TMLform;
 
 implementation
-{$R *.DFM}
+{$R *.lfm}
 
 uses main;
 
